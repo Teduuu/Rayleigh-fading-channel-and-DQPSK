@@ -13,56 +13,44 @@
 #define Wm 2*PI*200 
 #define N 32.0
 #define N0 8.0
-
 using namespace std;
 
 int main() {
-	
 	int SNR_dB;      // Signal-to-noise ratio in dB
 	int NUM_BITS = 5000000;
-    double EbN0;
-    int j, Tx, Rx, Sn, Sn_1 = 1;
-    int num_errors = 0;
-    double hi_t_real, hi_t_complex, hq_t_real, hq_t_complex;
-    double rn, rn_1, hi_t, yn, yn_1, m, sim_ber, theo_ber ;
-    unsigned seed;
-    seed = (unsigned)time(NULL); 
-    srand(seed); 
+	double EbN0;
+	int j, Tx, Rx, Sn, Sn_1 = 1;
+	int num_errors = 0;
+	double hi_t_real, hi_t_complex, hq_t_real, hq_t_complex;
+	double rn, rn_1, hi_t, yn, yn_1, m, sim_ber, theo_ber ;
+	unsigned seed;
+	seed = (unsigned)time(NULL); 
+    	srand(seed); 
 	ofstream file("dbpsk_data.csv");
 	//file << "0" << "," << "2.82843" << "," << "0" <<","<< "2.82843" << "," << "0" <<endl;
 	rn_1 = sqrt(2.82843*2.82843);
 	yn_1 = rn_1*Sn_1 + gaussian_noise(EbN0);
 	
 	for(SNR_dB = 0; SNR_dB<=50; SNR_dB+=5){
-	
 		EbN0 = (double)(pow(10, (SNR_dB / 10.0)));
-		
 		for(j = 1; j<NUM_BITS; j++){
-			
 			Tx = rand() % 2;
 			if(Tx==0) Sn = Sn_1 * -1 ;
-			else Sn = Sn_1;
-					
+			else Sn = Sn_1;	
 			hi_t_real = h_t_real(j*Ts);
 			hq_t_complex = h_t_complex(j*Ts);
 			rn = sqrt(hi_t_real*hi_t_real + hq_t_complex*hq_t_complex);
-			
 			yn = (double)rn*Sn + gaussian_noise(EbN0);
 			m = yn*yn_1;
-			
 			if(m>=0) Rx = 1;
 			else Rx = 0;
-			
 			if(Rx!=Tx) num_errors++;
-			
 			yn_1 = yn;
 	    	rn_1 = rn;
 	    	Sn_1 = Sn;	
 		}
-		
 		sim_ber = (double)num_errors / (NUM_BITS);
 		theo_ber = 0.5*(1- j0(Wm*Ts)/(1+1/EbN0) );
-
 		printf("Sim_Ber: %f\n", log10(sim_ber));
 		printf("Theo_Ber: %f\n", log10(theo_ber));
 		printf("Errors: %d\n", num_errors);
@@ -88,16 +76,13 @@ double gaussian_noise(double EbN0) {
 
 // compute alpha
 double alpha(int i){
- 	
  	double al = (2*PI*i)/N + PI/(2*N);
  	return al;
  }
  
 double phi_nk(int i){
-	
 	double phi_n = (i*PI)/N0;
 	return phi_n;
-	
 }
 // compute real part
 double h_t_real(double t){
